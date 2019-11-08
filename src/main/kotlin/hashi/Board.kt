@@ -1,5 +1,7 @@
 package hashi
 
+import java.lang.Math.min
+
 data class Board(val xSize: Int, val ySize: Int, val nodes: List<Node>, val bridges: List<Bridge> = emptyList()) {
     /**
     / x, y direction
@@ -31,14 +33,16 @@ data class Board(val xSize: Int, val ySize: Int, val nodes: List<Node>, val brid
                     getIslandToNorth(node),
                     getIslandToSouth(node))
 
-    fun copyNode(node: Node, newNode: Node): Board {
+    fun findNode(x: Int, y: Int): Node = nodes.find{it.x == x && it.y == y} ?: error("No node located at ($x, $y)")
+
+    fun replaceNode(node: Node, newNode: Node): Board {
         val newNodes = nodes.toMutableList().apply { this[this.indexOf(node)] = newNode }
         return this.copy(nodes = newNodes)
     }
 
     override fun equals(other: Any?): Boolean {
         return if (other is Board)
-            other.xSize == xSize && other.ySize == ySize && other.nodes == nodes &&
+            other.xSize == xSize && other.ySize == ySize && other.nodes.sorted() == nodes.sorted() &&
             other.bridges.sorted() == bridges.sorted()
         else false
     }
@@ -51,16 +55,30 @@ data class Board(val xSize: Int, val ySize: Int, val nodes: List<Node>, val brid
         return bridges.size == nodes.map{it.bridges}.sum() / 2
     }
 
+    fun connect(x1: Int, y1: Int, x2: Int, y2: Int) = connect(nodes.find{ it.x == x1 && it.y == y1}!!, nodes.find{it.x == x2 && it.y == y2}!!)
+
     fun connect(node1: Node, node2: Node): Board {
         assert(this.nodes.contains(node1) && this.nodes.contains(node2)) {"Cannot connect. $node1 or $node2 is not part of the board"}
         assert(node1.x == node2.x || node1.y == node2.y) {"Bridge cannot be connected diagonally. node1: $node1, node2: $node2"}
         assert(node1.x != node2.x || node1.y != node2.y) {"Cannot connect node to itself, source is same as destination"}
+        assert(node1.remaining() >= 1 && node2.remaining() >= 1){"No empty slot on $node1 or $node2 to connect"}
 
+        val newNode1 = node1.copy(connected = node1.connected + 1)
+        val newNode2 = node2.copy(connected = node2.connected + 1)
         return this
-                .copyNode(node1, node1.copy(connected = node1.connected + 1))
-                .copyNode(node2, node2.copy(connected = node2.connected + 1))
-                .copy(bridges = this.bridges + Bridge(node1, node2))
+                .replaceNode(node1, newNode1)
+                .replaceNode(node2, newNode2)
+                .copy(bridges = this.bridges + Bridge(newNode1, newNode2))
     }
+
+    fun connect2(x1: Int, y1: Int, x2: Int, y2: Int): Board {
+        val node1 = nodes.find{ it.x == x1 && it.y == y1}!!
+        val node2 = nodes.find{ it.x == x2 && it.y == y2}!!
+        assert(node1.remaining() >=2 && node2.remaining() >=2) { "Islands dont have enough open bridge slot to connect, node1: $node1, node2: $node2"}
+        return connect(x1, y1, x2, y2).connect(x1, y1, x2, y2)
+    }
+
+    fun connect2(node1: Node, node2: Node) = connect2(node1.x, node1.y, node2.x, node2.y)
 
     fun printBoard(): String {
         val board = (1..ySize).map{ (1..xSize).map{"0"}.toMutableList() }.toMutableList()
@@ -81,7 +99,7 @@ data class Board(val xSize: Int, val ySize: Int, val nodes: List<Node>, val brid
 
     companion object {
         fun fromString(layout: String): Board {
-            val xys = layout.split("\n").map{it.toCharArray().toList().map{c -> c.toString()}}
+            val xys = layout.split("\n").map{it.trim().toCharArray().toList().map{c -> c.toString()}}
             val xSize = xys.size
             val ySize = xys[0].size
 
@@ -123,7 +141,7 @@ data class Board(val xSize: Int, val ySize: Int, val nodes: List<Node>, val brid
             }.flatten()
 
             //set connected in nodes
-            val bridgeNodesCount = bridges.map{listOf(it.node1, it.node2)}.reduce{a, b -> a+b}.groupBy { it }.mapValues { it.value.size }
+            val bridgeNodesCount = bridges.map{listOf(it.node1, it.node2)}.fold(emptyList<Node>()){ acc, b -> acc+b }.groupBy { it }.mapValues { it.value.size }
             val nodesConnected = nodes.map{it.copy(connected = bridgeNodesCount[it] ?: 0)}
 
             return Board(xSize, ySize, nodesConnected, bridges)
@@ -136,7 +154,9 @@ data class Node(val id: Int = -1, val bridges: Int, val x: Int, val y: Int, val 
 
     fun isFull(): Boolean = connected == bridges
 
-    fun remaining(): Int = bridges - connected
+    fun remaining(): Int = bridges - connected // remaining unconnected bridges
+
+    fun maxUnconnected(): Int = min(bridges - connected, 2) // max remaining unconnected bridges in any direction
 
     override fun equals(other: Any?): Boolean {
         return if(other is Node) bridges == other.bridges && x == other.x && y == other.y

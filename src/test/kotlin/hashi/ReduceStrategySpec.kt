@@ -55,5 +55,26 @@ class ReduceStrategySpec : Spek({
             println(actual.printBridges())
             assertEquals(expected.printBoard(), actual.printBoard())
         }
+
+        it("should reduce island with six bridges and three neighbors"){
+            val board =  Board.fromString("""
+                00200
+                00000
+                30600
+                00000
+                1-4-1
+            """.trimIndent())
+
+            val expected =  Board.fromString("""
+                00200
+                00=00
+                3=600
+                00=00
+                1-4-1
+            """.trimIndent())
+
+            val actual = board.let { SixBridgesIsland.reduceBoard(it) }
+            assertEquals(expected, actual)
+        }
     }
 })

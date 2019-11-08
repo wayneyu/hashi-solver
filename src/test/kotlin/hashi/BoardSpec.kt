@@ -67,6 +67,31 @@ class BoardSpec : Spek({
             assertEquals(expected, actual)
         }
 
+        it("should connect two nodes by x, y coordinate") {
+            val board = Board.fromString("""
+                101
+            """.trimIndent())
+            val expected = Board.fromString("""
+                1-1
+            """.trimIndent())
+
+            assertEquals(expected, board.connect(0, 0, 0, 2))
+            assertEquals(expected.nodes.map{it.connected}, board.connect(0, 0, 0, 2).nodes.map{it.connected})
+        }
+
+        it("should double connect two nodes") {
+            val board = Board.fromString("""
+                202
+            """.trimIndent())
+            val expected = Board.fromString("""
+                2=2
+            """.trimIndent())
+
+            assertEquals(expected, board.connect2(0, 0, 0, 2))
+            assertEquals(expected.nodes.map{it.connected}, board.connect2(0, 0, 0, 2).nodes.map{it.connected})
+            assertEquals(expected.nodes.map{it.connected}, board.connect2(board.findNode(0, 0), board.findNode(0, 2)).nodes.map{it.connected})
+        }
+
         it("should print out board in 2d") {
             val node1 = Node(1, 1, 0, 0)
             val node2 = Node(2, 3, 0, 2)

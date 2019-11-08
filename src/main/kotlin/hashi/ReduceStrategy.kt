@@ -20,9 +20,9 @@ object MoreThanThreeBridgesAndTwoNeighbors : ReduceStrategy {
         val neighbor1 = neighbors[0]
         val neighbor2 = neighbors[1]
         return board
-                .copyNode(node, node.copy(connected = node.connected + 2))
-                .copyNode(neighbor1, neighbor1.copy(connected = neighbor1.connected + 1))
-                .copyNode(neighbor2, neighbor2.copy(connected = neighbor2.connected + 1))
+                .replaceNode(node, node.copy(connected = node.connected + 2))
+                .replaceNode(neighbor1, neighbor1.copy(connected = neighbor1.connected + 1))
+                .replaceNode(neighbor2, neighbor2.copy(connected = neighbor2.connected + 1))
                 .copy(bridges = board.bridges + Bridge(node, neighbor2) + Bridge(node, neighbor1))
     }
 }
@@ -34,7 +34,7 @@ object OneNonConnectedNeighbor : ReduceStrategy {
     override fun applicable(node: Node, board: Board): Boolean {
         val neighbors = board.getNeighborIslands(node)
         val neighbor1 = neighbors.first()
-        return neighbors.size == 1 && !neighbor1.isFull() && neighbor1.remaining() >= node.remaining() && node.remaining() <= 2
+        return neighbors.size == 1 && !neighbor1.isFull() && neighbor1.maxUnconnected() >= node.remaining() && node.remaining() <= 2
     }
 
     override fun reduce(node: Node, board: Board): Board {
@@ -52,14 +52,37 @@ object NeighborsWithSameRemainingBridges : ReduceStrategy {
      * 2-[2]-1
      */
     override fun applicable(node: Node, board: Board): Boolean {
-        println(node)
-        println(board.getNeighborIslands(node).sumBy { it.remaining() } == node.remaining())
         val neighbors = board.getNeighborIslands(node)
-        return neighbors.sumBy { it.remaining() } == node.remaining()
+        return neighbors.sumBy { it.maxUnconnected() } == node.remaining()
     }
 
     override fun reduce(node: Node, board: Board): Board {
         val neighbors = node.run { board.getNeighborIslands(this) }
-        return neighbors.fold(board) {newBoard, neighbor -> if (neighbor.remaining() == 2) newBoard.connect(node, neighbor).connect(node, neighbor) else newBoard.connect(node, neighbor) }
+        return neighbors.fold(board) {newBoard, neighbor ->
+            when (neighbor.maxUnconnected()) {
+                2 -> newBoard.connect2(node, neighbor)
+                1 -> newBoard.connect(node, neighbor)
+                else -> newBoard
+            }
+        }
+    }
+}
+
+object SixBridgesIsland: ReduceStrategy {
+    /**
+     * 2-[2]-1
+     */
+    private fun condition1(node: Node, board: Board): Boolean {
+        val neighbors = board.getNeighborIslands(node)
+        return neighbors.size == 3 && neighbors.map{it.maxUnconnected()}.sum() >= 6
+    }
+
+    override fun applicable(node: Node, board: Board): Boolean {
+        return condition1(node, board)
+    }
+
+    override fun reduce(node: Node, board: Board): Board {
+        val neighbors = board.getNeighborIslands(node)
+        return neighbors.fold(board){acc: Board, neighbor: Node -> acc.connect2(node, neighbor) }
     }
 }
