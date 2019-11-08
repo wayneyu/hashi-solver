@@ -6,6 +6,8 @@ import org.jetbrains.spek.api.dsl.it
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 @RunWith(JUnitPlatform::class)
@@ -79,6 +81,18 @@ class BoardSpec : Spek({
             assertEquals(expected.nodes.map{it.connected}, board.connect(0, 0, 0, 2).nodes.map{it.connected})
         }
 
+        it("should throw error if building bridge that crosses another bridge") {
+            val board = Board.fromString("""
+                0010
+                20-1
+                0020
+            """.trimIndent())
+
+            println(board.connect(1, 0, 1, 3))
+
+            assertFails("failed"){board.connect(1, 0, 1, 3)}
+        }
+
         it("should double connect two nodes") {
             val board = Board.fromString("""
                 202
@@ -125,12 +139,19 @@ class BoardSpec : Spek({
                 2-101
             """.trimIndent()
 
-            println(layout)
-
             val actual = Board.fromString(layout)
 
-            println()
-            println(actual.printBoard())
+            assertEquals(layout, actual.printBoard())
+        }
+
+        it("should translate a 2d map of a board") {
+            val layout = """
+                0010
+                10-1
+                0010
+            """.trimIndent()
+
+            val actual = Board.fromString(layout)
 
             assertEquals(layout, actual.printBoard())
         }
@@ -145,10 +166,10 @@ class BoardSpec : Spek({
             """.trimIndent()
 
 
-            val node1 = Node(1, 1,0, 0, 1)
-            val node2 = Node(2, 2,0, 2, 2)
-            val node3 = Node(3, 3,0, 4, 3)
-            val node4 = Node(4, 2,2, 4, 2)
+            val node1 = Node(1, 1,0, 0, 0)
+            val node2 = Node(2, 2,0, 2, 0)
+            val node3 = Node(3, 3,0, 4, 0)
+            val node4 = Node(4, 2,2, 4, 0)
             val expected = Board(5, 5, listOf(node1, node2, node3, node4))
                     .connect(node1, node2)
                     .connect(node2, node3)
