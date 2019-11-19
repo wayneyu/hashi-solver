@@ -67,22 +67,3 @@ object NeighborsWithSameRemainingBridges : ReduceStrategy {
         }
     }
 }
-
-object SixBridgesIsland: ReduceStrategy {
-    /**
-     * 2-[2]-1
-     */
-    private fun condition1(node: Node, board: Board): Boolean {
-        val neighbors = board.getNeighborIslands(node)
-        return neighbors.size == 3 && neighbors.map{it.maxUnconnected()}.sum() >= 6
-    }
-
-    override fun applicable(node: Node, board: Board): Boolean {
-        return condition1(node, board)
-    }
-
-    override fun reduce(node: Node, board: Board): Board {
-        val neighbors = board.getNeighborIslands(node)
-        return neighbors.fold(board){acc: Board, neighbor: Node -> acc.connect2(node, neighbor) }
-    }
-}

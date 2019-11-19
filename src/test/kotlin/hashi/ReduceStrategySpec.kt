@@ -3,6 +3,7 @@ package hashi
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
+import org.jetbrains.spek.api.dsl.xit
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
 import kotlin.test.assertEquals
@@ -15,7 +16,7 @@ class ReduceStrategySpec : Spek({
         val expected =  Board.fromString(finalBoard)
         val actual = board.let { it -> reduceStrategy.reduceBoard(it) }
         println("expected\n${expected.printBoard()}\n")
-        println("actual\n${actual.printBoard()}")
+        println("actual\n${actual.printBoard()}\n")
         assertEquals(expected, actual)
     }
 
@@ -90,8 +91,95 @@ class ReduceStrategySpec : Spek({
                 3=600
                 00=00
                 1-4-1
-            """.trimIndent(), SixBridgesIsland)
+            """.trimIndent(), NeighborsWithSameRemainingBridges)
         }
+
+        it("should reduce island with four bridges and two neighbors"){
+            verifyStrategy(
+                    """
+                00200
+                00000
+                30003
+                00000
+                04004
+            """.trimIndent(),
+                    """
+                00200
+                00000
+                30003
+                0000=
+                04==4
+            """.trimIndent(), NeighborsWithSameRemainingBridges)
+
+            verifyStrategy(
+                    """
+                00200
+                00000
+                305-1
+                00000
+                00000
+            """.trimIndent(),
+                    """
+                00200
+                00=00
+                3=5-1
+                00000
+                00000
+            """.trimIndent(), NeighborsWithSameRemainingBridges)
+
+            verifyStrategy(
+                    """
+                00200
+                00000
+                105-1
+                00000
+                00100
+            """.trimIndent(),
+                    """
+                00200
+                00=00
+                1-5-1
+                00-00
+                00100
+            """.trimIndent(), NeighborsWithSameRemainingBridges)
+        }
+
+
+        it("should reduce island with five bridges and two neighbors"){
+            verifyStrategy(
+                    """
+                00200
+                00000
+                306-1
+                00000
+                00100
+            """.trimIndent(),
+                    """
+                00200
+                00=00
+                3=6-1
+                00-00
+                00100
+            """.trimIndent(), NeighborsWithSameRemainingBridges)
+
+            verifyStrategy(
+                    """
+                00200
+                00000
+                30501
+                00000
+                00000
+            """.trimIndent(),
+                    """
+                00200
+                00=00
+                3=5-1
+                00000
+                00000
+            """.trimIndent(), NeighborsWithSameRemainingBridges)
+        }
+
+
     }
 
 })

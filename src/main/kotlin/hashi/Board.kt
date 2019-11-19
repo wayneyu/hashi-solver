@@ -74,7 +74,7 @@ data class Board(val xSize: Int, val ySize: Int, val nodes: List<Node>, val brid
     fun connect2(x1: Int, y1: Int, x2: Int, y2: Int): Board {
         val node1 = nodes.find{ it.x == x1 && it.y == y1}!!
         val node2 = nodes.find{ it.x == x2 && it.y == y2}!!
-        assert(node1.remaining() >=2 && node2.remaining() >=2) { "Islands dont have enough open bridge slot to connect, node1: $node1, node2: $node2"}
+        assert(node1.remaining() >=2 && node2.remaining() >=2) { "Islands dont have enough open bridge slot to connect, node1: $node1, node2: $node2, board: \n${printBoard()}"}
         return connect(x1, y1, x2, y2).connect(x1, y1, x2, y2)
     }
 
