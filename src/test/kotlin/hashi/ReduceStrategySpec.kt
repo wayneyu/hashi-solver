@@ -179,7 +179,41 @@ class ReduceStrategySpec : Spek({
             """.trimIndent(), NeighborsWithSameRemainingBridges)
         }
 
+    }
 
+    describe("boardReduceStrategy") {
+        it("should reduce board") {
+            val board = Board.fromString("""
+                2020020
+                0000001
+                6050300
+                0100003
+                3010010
+                0300805
+                4020000
+                0200502
+                2001000
+                0020503 
+            """.trimIndent())
+
+//            val expected = Board.fromString("""
+//                2020020
+//                0000001
+//                605-30-
+//                0100-03
+//                3010-10
+//                0300805
+//                4020000
+//                -200502
+//                2--100-
+//                00205-3
+//            """.trimIndent())
+
+            val actual = SolverReduceStrategy.reduce(board)
+
+            println(board.printBoard())
+            println(actual.printBoard())
+        }
     }
 
 })

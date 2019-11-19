@@ -1,16 +1,8 @@
 package hashi
 
-import hashi.search.SearchNode
 import java.lang.Math.min
 
-data class Board(val xSize: Int, val ySize: Int, val nodes: List<Node>, val bridges: List<Bridge> = emptyList()) : SearchNode {
-
-    override val neighbors: Set<SearchNode>
-        get() = this.nodes.flatMap{island -> this.getNeighborIslands(island).map{neighbor -> this.connect(island, neighbor)}}.toSet()
-
-    override fun isEnd(): Boolean {
-        return this.nodes.all { it.isFull() }
-    }
+data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val bridges: List<Bridge> = emptyList()) {
 
     /**
     / x, y direction
@@ -19,19 +11,19 @@ data class Board(val xSize: Int, val ySize: Int, val nodes: List<Node>, val brid
     / ...   ...
      **/
 
-    fun getIslandToWest(node: Node): Node? = nodes
+    fun getIslandToWest(node: Node): Node? = islands
             .filter { it -> it.x == node.x && it.y < node.y }
             .maxBy { it.y }
 
-    fun getIslandToEast(node: Node): Node? = nodes
+    fun getIslandToEast(node: Node): Node? = islands
             .filter { it -> it.x == node.x && it.y > node.y }
             .minBy { it.y }
 
-    fun getIslandToNorth(node: Node): Node? = nodes
+    fun getIslandToNorth(node: Node): Node? = islands
             .filter { it -> it.y == node.y && it.x < node.x }
             .maxBy { it.x }
 
-    fun getIslandToSouth(node: Node): Node? = nodes
+    fun getIslandToSouth(node: Node): Node? = islands
             .filter { it -> it.y == node.y && it.x > node.x }
             .minBy { it.x }
 
@@ -42,16 +34,16 @@ data class Board(val xSize: Int, val ySize: Int, val nodes: List<Node>, val brid
                     getIslandToNorth(node),
                     getIslandToSouth(node))
 
-    fun findNode(x: Int, y: Int): Node = nodes.find{it.x == x && it.y == y} ?: error("No node located at ($x, $y)")
+    fun findNode(x: Int, y: Int): Node = islands.find{it.x == x && it.y == y} ?: error("No node located at ($x, $y)")
 
     fun replaceNode(node: Node, newNode: Node): Board {
-        val newNodes = nodes.toMutableList().apply { this[this.indexOf(node)] = newNode }
-        return this.copy(nodes = newNodes)
+        val newNodes = islands.toMutableList().apply { this[this.indexOf(node)] = newNode }
+        return this.copy(islands = newNodes)
     }
 
     override fun equals(other: Any?): Boolean {
         return if (other is Board)
-            other.xSize == xSize && other.ySize == ySize && other.nodes.sorted() == nodes.sorted() &&
+            other.xSize == xSize && other.ySize == ySize && other.islands.sorted() == islands.sorted() &&
             other.bridges.sorted() == bridges.sorted()
         else false
     }
@@ -61,13 +53,13 @@ data class Board(val xSize: Int, val ySize: Int, val nodes: List<Node>, val brid
     }
 
     fun isSolved(): Boolean {
-        return bridges.size == nodes.map{it.bridges}.sum() / 2
+        return bridges.size == islands.map{it.bridges}.sum() / 2
     }
 
-    fun connect(x1: Int, y1: Int, x2: Int, y2: Int) = connect(nodes.find{ it.x == x1 && it.y == y1}!!, nodes.find{it.x == x2 && it.y == y2}!!)
+    fun connect(x1: Int, y1: Int, x2: Int, y2: Int) = connect(islands.find{ it.x == x1 && it.y == y1}!!, islands.find{it.x == x2 && it.y == y2}!!)
 
     fun connect(node1: Node, node2: Node): Board {
-        assert(this.nodes.contains(node1) && this.nodes.contains(node2)) {"Cannot connect. $node1 or $node2 is not part of the board"}
+        assert(this.islands.contains(node1) && this.islands.contains(node2)) {"Cannot connect. $node1 or $node2 is not part of the board"}
         assert(node1.x == node2.x || node1.y == node2.y) {"Bridge cannot be connected diagonally. node1: $node1, node2: $node2"}
         assert(node1.x != node2.x || node1.y != node2.y) {"Cannot connect node to itself, source is same as destination"}
         assert(node1.remaining() >= 1 && node2.remaining() >= 1){"No empty slot on $node1 or $node2 to connect"}
@@ -81,8 +73,8 @@ data class Board(val xSize: Int, val ySize: Int, val nodes: List<Node>, val brid
     }
 
     fun connect2(x1: Int, y1: Int, x2: Int, y2: Int): Board {
-        val node1 = nodes.find{ it.x == x1 && it.y == y1}!!
-        val node2 = nodes.find{ it.x == x2 && it.y == y2}!!
+        val node1 = islands.find{ it.x == x1 && it.y == y1}!!
+        val node2 = islands.find{ it.x == x2 && it.y == y2}!!
         assert(node1.remaining() >=2 && node2.remaining() >=2) { "Islands dont have enough open bridge slot to connect, node1: $node1, node2: $node2, board: \n${printBoard()}"}
         return connect(x1, y1, x2, y2).connect(x1, y1, x2, y2)
     }
@@ -91,7 +83,7 @@ data class Board(val xSize: Int, val ySize: Int, val nodes: List<Node>, val brid
 
     fun printBoard(): String {
         val board = (1..xSize).map{ (1..ySize).map{"0"}.toMutableList() }.toMutableList()
-        nodes.forEach { node -> board[node.x][node.y] = node.bridges.toString() }
+        islands.forEach { node -> board[node.x][node.y] = node.bridges.toString() }
         bridges
                 .groupBy{it}
                 .mapValues{ it.value.size }

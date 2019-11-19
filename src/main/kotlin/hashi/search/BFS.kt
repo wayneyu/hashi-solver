@@ -6,7 +6,7 @@ object BFS : ShortestPathFinder {
 
     override val logger = LoggerFactory.getLogger(BFS::class.toString())
 
-    private const val maxIterations = 100
+    private const val maxIterations = 3
 
     override fun search(root: SearchNode): SearchResult {
 

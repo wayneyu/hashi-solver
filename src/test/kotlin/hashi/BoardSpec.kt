@@ -7,7 +7,6 @@ import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
-import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 @RunWith(JUnitPlatform::class)
@@ -78,7 +77,7 @@ class BoardSpec : Spek({
             """.trimIndent())
 
             assertEquals(expected, board.connect(0, 0, 0, 2))
-            assertEquals(expected.nodes.map{it.connected}, board.connect(0, 0, 0, 2).nodes.map{it.connected})
+            assertEquals(expected.islands.map{it.connected}, board.connect(0, 0, 0, 2).islands.map{it.connected})
         }
 
         it("should throw error if building bridge that crosses another bridge") {
@@ -102,8 +101,8 @@ class BoardSpec : Spek({
             """.trimIndent())
 
             assertEquals(expected, board.connect2(0, 0, 0, 2))
-            assertEquals(expected.nodes.map{it.connected}, board.connect2(0, 0, 0, 2).nodes.map{it.connected})
-            assertEquals(expected.nodes.map{it.connected}, board.connect2(board.findNode(0, 0), board.findNode(0, 2)).nodes.map{it.connected})
+            assertEquals(expected.islands.map{it.connected}, board.connect2(0, 0, 0, 2).islands.map{it.connected})
+            assertEquals(expected.islands.map{it.connected}, board.connect2(board.findNode(0, 0), board.findNode(0, 2)).islands.map{it.connected})
         }
 
         it("should print out board in 2d") {
@@ -176,7 +175,7 @@ class BoardSpec : Spek({
                     .connect(node3, node4).connect(node3, node4)
 
             val actual = Board.fromString(layout)
-            assertEquals(expected.nodes, actual.nodes)
+            assertEquals(expected.islands, actual.islands)
         }
     }
 })

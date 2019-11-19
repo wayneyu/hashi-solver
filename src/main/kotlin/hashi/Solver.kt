@@ -4,12 +4,19 @@ import hashi.search.BFS
 import hashi.search.SearchNode
 import hashi.search.ShortestPathFinder
 
-class Solver(private val pathFinder: ShortestPathFinder) {
+class Solver(private val pathFinder: ShortestPathFinder, private val reduceStrategy: BoardReduceStrategy) {
+    fun solve(board: Board): List<Board> {
+        val shortestPath = pathFinder.shortestPath(BoardNode(board, reduceStrategy))
+        return shortestPath.map{it as BoardNode}.map{it.board}
+    }
+}
+
+object SolverReduceStrategy : BoardReduceStrategy {
 
     private val REDUCE_STRATEGIES: List<ReduceStrategy> = listOf(OneNonConnectedNeighbor, MoreThanThreeBridgesAndTwoNeighbors, NeighborsWithSameRemainingBridges)
 
-    fun reduce(board: Board): Board {
-        val niter = 10
+    override fun reduce(board: Board): Board {
+        val niter = 5
         var newBoard = board
         loop@ for (i in 1..niter) {
             println("iter: $i")
@@ -22,13 +29,18 @@ class Solver(private val pathFinder: ShortestPathFinder) {
     private fun reduceBridges(board: Board): Board {
         return REDUCE_STRATEGIES.fold(board) { newBoard, rule -> rule.reduceBoard(newBoard)}
     }
+}
 
-    fun solve(board: Board): List<Board> {
-        val shortestPath = pathFinder.shortestPath(board)
-        return shortestPath.map{ it as Board }
+data class BoardNode(val board: Board, val reduceStrategy: BoardReduceStrategy): SearchNode {
+
+    override val neighbors: Set<SearchNode>
+        get() = reduceStrategy.reduce(board).islands.flatMap{ island -> board.getNeighborIslands(island).map{ neighbor -> board.connect(island, neighbor)}}
+                .map{BoardNode(it, reduceStrategy)}.toSet()
+
+    override fun isEnd(): Boolean {
+        return board.islands.all { it.isFull() }
     }
 
-    fun isSolved(board: Board): Boolean = board.isEnd()
 }
 
 fun main(args:Array<String>) {
@@ -45,6 +57,6 @@ fun main(args:Array<String>) {
         0020503
     """.trimIndent())
 
-    val solution = Solver(BFS).solve(board)
+    val solution = Solver(BFS, SolverReduceStrategy).solve(board)
     solution.forEach {it -> println(it.printBoard()); println()}
 }

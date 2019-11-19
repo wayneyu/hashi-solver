@@ -1,10 +1,18 @@
 package hashi
 
 interface ReduceStrategy {
-    fun reduceBoard(board: Board): Board = board.nodes.fold(board){newBoard, node ->
-        if (applicable(node, board)) reduce(node, newBoard) else newBoard}
+    fun reduceBoard(board: Board): Board = board.islands.fold(board){ newBoard, node ->
+        if (applicable(node, board)) {
+            println("applicable: $node, strategy: ${this.javaClass.simpleName} ")
+            reduce(node, newBoard)
+        } else newBoard
+    }
     fun reduce(node: Node, board: Board): Board
     fun applicable(node: Node, board: Board): Boolean
+}
+
+interface BoardReduceStrategy {
+    fun reduce(board: Board): Board
 }
 
 object MoreThanThreeBridgesAndTwoNeighbors : ReduceStrategy {
