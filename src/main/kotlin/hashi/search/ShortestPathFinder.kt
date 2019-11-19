@@ -12,6 +12,7 @@ interface ShortestPathFinder {
         val searchResult = search(root)
         val shortestPath = shortestPathFromEndToStart(searchResult.endNode, searchResult.shortestParent).reversed()
         logger.info("Search finished in ${searchResult.iterations} iterations, shortest path: ${shortestPath.size - 1} steps")
+        if (searchResult.endNode.isEnd()) logger.info("Board solved") else logger.info("Search finished without finding a solution")
         return shortestPath
     }
 
