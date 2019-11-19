@@ -1,10 +1,14 @@
 package hashi
 
-object Solver {
+import hashi.search.BFS
+import hashi.search.SearchNode
+import hashi.search.ShortestPathFinder
 
-    private val REDUCE_STRATEGIES: List<ReduceStrategy> = listOf(OneNonConnectedNeighbor, MoreThanThreeBridgesAndTwoNeighbors)
+class Solver(private val pathFinder: ShortestPathFinder) {
 
-    fun solve(board: Board): Board {
+    private val REDUCE_STRATEGIES: List<ReduceStrategy> = listOf(OneNonConnectedNeighbor, MoreThanThreeBridgesAndTwoNeighbors, NeighborsWithSameRemainingBridges)
+
+    fun reduce(board: Board): Board {
         val niter = 10
         var newBoard = board
         loop@ for (i in 1..niter) {
@@ -18,16 +22,29 @@ object Solver {
     private fun reduceBridges(board: Board): Board {
         return REDUCE_STRATEGIES.fold(board) { newBoard, rule -> rule.reduceBoard(newBoard)}
     }
+
+    fun solve(board: Board): List<Board> {
+        val shortestPath = pathFinder.shortestPath(board)
+        return shortestPath.map{ it as Board }
+    }
+
+    fun isSolved(board: Board): Boolean = board.isEnd()
 }
 
 fun main(args:Array<String>) {
-    val node1 = Node(1, 1, 0, 0)
-    val node2 = Node(2, 2, 4, 4)
-    val node3 = Node(3, 3, 0, 4)
-    val board = Board(5,5, listOf(node1, node2, node3))
+    val board = Board.fromString("""
+        2000000
+        0000000
+        6000000
+        0000000
+        3000000
+        0000000
+        4000000
+        0000000
+        0000000
+        0000000
+    """.trimIndent())
 
-    val solved = Solver.solve(board)
-    println(solved.nodes.joinToString("\n"))
-    println(solved.printBridges())
-    println("isSolved: ${solved.isSolved()}")
+    val solution = Solver(BFS).solve(board)
+    solution.forEach {it -> println(it.printBoard()); println()}
 }

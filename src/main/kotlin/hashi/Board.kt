@@ -1,8 +1,17 @@
 package hashi
 
+import hashi.search.SearchNode
 import java.lang.Math.min
 
-data class Board(val xSize: Int, val ySize: Int, val nodes: List<Node>, val bridges: List<Bridge> = emptyList()) {
+data class Board(val xSize: Int, val ySize: Int, val nodes: List<Node>, val bridges: List<Bridge> = emptyList()) : SearchNode {
+
+    override val neighbors: Set<SearchNode>
+        get() = this.nodes.flatMap{island -> this.getNeighborIslands(island).map{neighbor -> this.connect(island, neighbor)}}.toSet()
+
+    override fun isEnd(): Boolean {
+        return this.nodes.all { it.isFull() }
+    }
+
     /**
     / x, y direction
     / 0,0,  0,1  ...
