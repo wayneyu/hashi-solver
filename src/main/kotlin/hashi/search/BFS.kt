@@ -22,7 +22,7 @@ object BFS : ShortestPathFinder {
         shortestParentToNode[root] = root // set parent of root to root
 
         var iter = 0
-        while(queue.isNotEmpty() || iter < maxIterations) {
+        while(queue.isNotEmpty() && iter < maxIterations) {
             iter++
             node = queue.removeAt(0)
 
