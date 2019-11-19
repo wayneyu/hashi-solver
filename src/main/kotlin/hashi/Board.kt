@@ -90,7 +90,7 @@ data class Board(val xSize: Int, val ySize: Int, val nodes: List<Node>, val brid
     fun connect2(node1: Node, node2: Node) = connect2(node1.x, node1.y, node2.x, node2.y)
 
     fun printBoard(): String {
-        val board = (1..ySize).map{ (1..xSize).map{"0"}.toMutableList() }.toMutableList()
+        val board = (1..xSize).map{ (1..ySize).map{"0"}.toMutableList() }.toMutableList()
         nodes.forEach { node -> board[node.x][node.y] = node.bridges.toString() }
         bridges
                 .groupBy{it}

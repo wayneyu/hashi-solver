@@ -33,16 +33,16 @@ class Solver(private val pathFinder: ShortestPathFinder) {
 
 fun main(args:Array<String>) {
     val board = Board.fromString("""
-        2000000
-        0000000
-        6000000
-        0000000
-        3000000
-        0000000
-        4000000
-        0000000
-        0000000
-        0000000
+        2020020
+        0000001
+        6050300
+        0100003
+        3010010
+        0300805
+        4020000
+        0200502
+        2001000
+        0020503
     """.trimIndent())
 
     val solution = Solver(BFS).solve(board)
