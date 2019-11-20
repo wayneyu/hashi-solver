@@ -7,6 +7,7 @@ import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @RunWith(JUnitPlatform::class)
@@ -46,6 +47,18 @@ class BoardSpec : Spek({
 
         it("should return all neighbor nodes") {
             assertEquals(listOf(node1, node5), board.getNeighborIslands(node2))
+        }
+
+        it("should return only neighbors that are connectable") {
+            val board = Board.fromString("""
+                00101
+                00-00
+                10-03
+                00-00
+                1-200
+            """.trimIndent())
+
+            assertEquals(board.getNeighborIslands(board.findNode(2, 4)), listOf(board.findNode(0, 4)))
         }
 
         it("should return true if the board is solved") {
@@ -88,7 +101,7 @@ class BoardSpec : Spek({
             """.trimIndent())
 
             println(board.connect(1, 0, 1, 3))
-
+            println(board.getNeighborIslands(board.findNode(1, 0)))
             assertFails("failed"){board.connect(1, 0, 1, 3)}
         }
 
@@ -176,6 +189,19 @@ class BoardSpec : Spek({
 
             val actual = Board.fromString(layout)
             assertEquals(expected.islands, actual.islands)
+        }
+
+
+        it("should return not reachable if one node cannot connect to another") {
+            val board = Board.fromString("""
+                00101
+                00-00
+                10-03
+                00-00
+                1-200
+            """.trimIndent())
+
+            assertFalse { board.reachable(board.findNode(2, 0), board.findNode(0, 4)) }
         }
     }
 })

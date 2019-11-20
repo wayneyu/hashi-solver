@@ -33,12 +33,17 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
                     getIslandToWest(node),
                     getIslandToNorth(node),
                     getIslandToSouth(node))
+                    .mapNotNull { neighbor -> if (reachable(neighbor, node)) neighbor else null}
 
     fun findNode(x: Int, y: Int): Node = islands.find{it.x == x && it.y == y} ?: error("No node located at ($x, $y)")
 
     fun replaceNode(node: Node, newNode: Node): Board {
         val newNodes = islands.toMutableList().apply { this[this.indexOf(node)] = newNode }
         return this.copy(islands = newNodes)
+    }
+
+    fun reachable(node1: Node, node2: Node): Boolean {
+        return bridges.all { !it.intersects(Bridge(node1, node2)) }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -195,6 +200,17 @@ data class Bridge(val node1: Node, val node2: Node) : Comparable<Bridge>{
             node1.y == node2.y -> 0
             else -> throw IllegalStateException("Bridge cannot be connected diagonally. node1: $node1, node2: $node2")
         }
+    }
+
+    fun intersects(bridge: Bridge): Boolean {
+        return (bridge.node1.y >= node1.y && bridge.node1.y <= node2.y && node1.x >= bridge.node1.x && node1.x <= bridge.node2.x) ||
+                (bridge.node1.x >= node1.x && bridge.node1.x <= node2.x && node1.y >= bridge.node1.y && node1.y <= bridge.node2.y) ||
+                (bridge.node1.y >= node2.y && bridge.node1.y <= node1.y && node2.x >= bridge.node1.x && node2.x <= bridge.node2.x) ||
+                (bridge.node1.x >= node2.x && bridge.node1.x <= node1.x && node2.y >= bridge.node1.y && node2.y <= bridge.node2.y) ||
+                (bridge.node2.y >= node1.y && bridge.node2.y <= node2.y && node1.x >= bridge.node2.x && node1.x <= bridge.node1.x) ||
+                (bridge.node2.x >= node1.x && bridge.node2.x <= node2.x && node1.y >= bridge.node2.y && node1.y <= bridge.node1.y) ||
+                (bridge.node2.y >= node2.y && bridge.node2.y <= node1.y && node2.x >= bridge.node2.x && node2.x <= bridge.node1.x) ||
+                (bridge.node2.x >= node2.x && bridge.node2.x <= node1.x && node2.y >= bridge.node2.y && node2.y <= bridge.node1.y)
     }
 
     override fun hashCode(): Int {
