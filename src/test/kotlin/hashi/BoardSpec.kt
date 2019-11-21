@@ -100,8 +100,6 @@ class BoardSpec : Spek({
                 0020
             """.trimIndent())
 
-            println(board.connect(1, 0, 1, 3))
-            println(board.getNeighborIslands(board.findNode(1, 0)))
             assertFails("failed"){board.connect(1, 0, 1, 3)}
         }
 

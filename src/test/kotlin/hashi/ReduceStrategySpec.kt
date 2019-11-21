@@ -196,23 +196,25 @@ class ReduceStrategySpec : Spek({
                 0020503 
             """.trimIndent())
 
-//            val expected = Board.fromString("""
-//                2020020
-//                0000001
-//                605-30-
-//                0100-03
-//                3010-10
-//                0300805
-//                4020000
-//                -200502
-//                2--100-
-//                00205-3
-//            """.trimIndent())
+            val expected = Board.fromString("""
+                202--20
+                =0-00-1
+                6=5-3--
+                =1-0=-3
+                3-10=1=
+                -3==8=5
+                4=20=0-
+                -2==502
+                2--1-0-
+                002=5=3
+            """.trimIndent())
 
             val actual = SolverReduceStrategy.reduce(board)
 
             println(board.printBoard())
             println(actual.printBoard())
+            println(actual.isSolved())
+            println("Unconnected: ${actual.unConnectedNodes().joinToString("\n")}")
         }
     }
 
