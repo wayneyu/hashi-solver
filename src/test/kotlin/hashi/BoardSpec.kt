@@ -52,9 +52,9 @@ class BoardSpec : Spek({
         it("should return only neighbors that are connectable") {
             val board = Board.fromString("""
                 00101
-                00-00
-                10-03
-                00-00
+                00|00
+                10|03
+                00|00
                 1-200
             """.trimIndent())
 
@@ -67,7 +67,7 @@ class BoardSpec : Spek({
             val node3 = Node(3, 2, 4, 4)
             val board = Board(5,5, listOf(node1, node2, node3))
 
-            assertTrue(board.copy(bridges = listOf(Bridge(node3, node2), Bridge(node3, node2), Bridge(node3,node1))).isSolved())
+            assertTrue(board.connect(node3, node2).connect(node3, node2).connect(node2,node1).isSolved())
         }
 
         it("should return board after connecting two nodes") {
@@ -96,7 +96,7 @@ class BoardSpec : Spek({
         it("should throw error if building bridge that crosses another bridge") {
             val board = Board.fromString("""
                 0010
-                20-1
+                20|1
                 0020
             """.trimIndent())
 
@@ -131,9 +131,9 @@ class BoardSpec : Spek({
             val actual = board.printBoard()
             val expected = """
                 1-3=4
-                0000=
+                0000!
                 00003
-                0000-
+                0000|
                 00001
             """.trimIndent()
 
@@ -143,9 +143,9 @@ class BoardSpec : Spek({
         it("should translate a 2d map of a board") {
             val layout = """
                 3-5=4
-                =0=0=
+                !0!0!
                 4-4-4
-                -000-
+                |000|
                 2-101
             """.trimIndent()
 
@@ -157,7 +157,7 @@ class BoardSpec : Spek({
         it("should translate a 2d map of a board") {
             val layout = """
                 0010
-                10-1
+                10|1
                 0010
             """.trimIndent()
 
@@ -169,7 +169,7 @@ class BoardSpec : Spek({
         it("should convert a 2d layout to a board with bridges") {
             val layout = """
                 1-2-3
-                0000=
+                0000!
                 00002
                 00000
                 00000
@@ -193,9 +193,9 @@ class BoardSpec : Spek({
         it("should return not reachable if one node cannot connect to another") {
             val board = Board.fromString("""
                 00101
-                00-00
-                10-03
-                00-00
+                00|00
+                10|03
+                00|00
                 1-200
             """.trimIndent())
 

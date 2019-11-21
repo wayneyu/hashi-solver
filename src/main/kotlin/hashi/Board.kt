@@ -55,7 +55,7 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
     override fun equals(other: Any?): Boolean {
         return if (other is Board)
             other.xSize == xSize && other.ySize == ySize && other.islands.sorted() == islands.sorted() &&
-            other.bridges.sorted() == bridges.sorted()
+            other.bridges.toSet() == bridges.toSet()
         else false
     }
 
@@ -103,15 +103,21 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
                 .forEach { (bridge, size) ->
                     val (node1, node2) = listOf(bridge.node1, bridge.node2).sorted()
                     if (bridge.direction() == 1)
-                        ((node1.y + 1) until node2.y).forEach {i -> board[node1.x][i] = if (size == 2) "=" else "-"}
+                        ((node1.y + 1) until node2.y).forEach {i -> board[node1.x][i] = if (size == 2) yDoubleBridgeToken else ySingleBridgeToken}
                     else
-                        ((node1.x + 1) until node2.x).forEach {i -> board[i][node1.y] = if (size == 2) "=" else "-"}
+                        ((node1.x + 1) until node2.x).forEach {i -> board[i][node1.y] = if (size == 2) xDoubleBridgeToken else xSingleBridgeToken}
                 }
 
         return board.joinToString("\n"){ it -> it.joinToString("")}
     }
 
     companion object {
+
+        private const val ySingleBridgeToken = "-"
+        private const val yDoubleBridgeToken = "="
+        private const val xSingleBridgeToken = "|"
+        private const val xDoubleBridgeToken = "!"
+
         fun fromString(layout: String): Board {
             val xys = layout.split("\n").map{it.trim().toCharArray().toList().map{c -> c.toString()}}
             val xSize = xys.size
@@ -128,24 +134,30 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
             val bridges: List<Bridge> = xys.mapIndexed{ x, row ->
                 var starty = -1
                 row.mapIndexed { y, c ->
-                    if (c == "-" || c == "=") {
-                        if (y > 0 && row[y - 1].toIntOrNull()?.let{it > 0} == true) //start of bridge in y direction
+                    if (c == ySingleBridgeToken || c == yDoubleBridgeToken) {
+                        //start of bridge in y direction
+                        if (y > 0 && row[y - 1].toIntOrNull()?.let { it > 0 } == true)
                             starty = y - 1
-                        if (x > 0 && xys[x - 1][y].toIntOrNull()?.let{it > 0} == true) //start of bridge in x direction
+                        emptyList<Bridge>()
+                    } else if (c == xSingleBridgeToken || c == xDoubleBridgeToken) {
+                        //start of bridge in x direction
+                        if (x > 0 && xys[x - 1][y].toIntOrNull()?.let{it > 0} == true)
                             startx[y] = x - 1
                         emptyList<Bridge>()
                     } else {
-                        (if (y > 0 && starty > -1 && (row[y - 1] == "-" || row[y-1] == "=")) {
+                        //End of bridge in y direction
+                        (if (y > 0 && starty > -1 && (row[y - 1] == ySingleBridgeToken || row[y-1] == yDoubleBridgeToken)) {
                             val node1 = nodes.find { it.x == x && it.y == starty }!!
                             val node2 = nodes.find { it.x == x && it.y == y }!!
                             starty = y
-                            listOf(Bridge(node1, node2)) + (if (row[y - 1] == "=") listOf(Bridge(node1, node2)) else emptyList<Bridge>())
+                            listOf(Bridge(node1, node2)) + (if (row[y - 1] == yDoubleBridgeToken) listOf(Bridge(node1, node2)) else emptyList<Bridge>())
                         } else emptyList<Bridge>()) +
-                        if (x > 0 && startx[y] > -1 && (xys[x - 1][y] == "-" || xys[x - 1][y] == "=")) {
+                        //End of bridge in x direction
+                        if (x > 0 && startx[y] > -1 && (xys[x - 1][y] == xSingleBridgeToken || xys[x - 1][y] == xDoubleBridgeToken)) {
                             val node1 = nodes.find { it.x == startx[y] && it.y == y }!!
                             val node2 = nodes.find { it.x == x && it.y == y }!!
                             startx[y] = x
-                            listOf(Bridge(node1, node2)) + (if (xys[x - 1][y] == "=") listOf(Bridge(node1, node2)) else emptyList<Bridge>())
+                            listOf(Bridge(node1, node2)) + (if (xys[x - 1][y] == xDoubleBridgeToken) listOf(Bridge(node1, node2)) else emptyList<Bridge>())
                         } else emptyList<Bridge>()
                     }
                 }.flatten()

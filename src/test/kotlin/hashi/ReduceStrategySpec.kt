@@ -7,6 +7,7 @@ import org.jetbrains.spek.api.dsl.xit
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @RunWith(JUnitPlatform::class)
 class ReduceStrategySpec : Spek({
@@ -33,9 +34,9 @@ class ReduceStrategySpec : Spek({
             """.trimIndent(),
             """
                 1---3
-                0000-
-                0000-
-                0000-
+                0000|
+                0000|
+                0000|
                 00002
             """.trimIndent(), MoreThanThreeBridgesAndTwoNeighbors)
         }
@@ -69,9 +70,9 @@ class ReduceStrategySpec : Spek({
             """.trimIndent(),
                     """
                 00200
-                00=00
+                00!00
                 1-400
-                00-00
+                00|00
                 002-1
             """.trimIndent(), NeighborsWithSameRemainingBridges)
         }
@@ -87,9 +88,9 @@ class ReduceStrategySpec : Spek({
             """.trimIndent(),
                     """
                 00200
-                00=00
+                00!00
                 3=600
-                00=00
+                00!00
                 1-4-1
             """.trimIndent(), NeighborsWithSameRemainingBridges)
         }
@@ -107,7 +108,7 @@ class ReduceStrategySpec : Spek({
                 00200
                 00000
                 30003
-                0000=
+                0000!
                 04==4
             """.trimIndent(), NeighborsWithSameRemainingBridges)
 
@@ -121,7 +122,7 @@ class ReduceStrategySpec : Spek({
             """.trimIndent(),
                     """
                 00200
-                00=00
+                00!00
                 3=5-1
                 00000
                 00000
@@ -137,9 +138,9 @@ class ReduceStrategySpec : Spek({
             """.trimIndent(),
                     """
                 00200
-                00=00
+                00!00
                 1-5-1
-                00-00
+                00|00
                 00100
             """.trimIndent(), NeighborsWithSameRemainingBridges)
         }
@@ -156,9 +157,9 @@ class ReduceStrategySpec : Spek({
             """.trimIndent(),
                     """
                 00200
-                00=00
+                00!00
                 3=6-1
-                00-00
+                00|00
                 00100
             """.trimIndent(), NeighborsWithSameRemainingBridges)
 
@@ -172,7 +173,7 @@ class ReduceStrategySpec : Spek({
             """.trimIndent(),
                     """
                 00200
-                00=00
+                00!00
                 3=5-1
                 00000
                 00000
@@ -198,23 +199,21 @@ class ReduceStrategySpec : Spek({
 
             val expected = Board.fromString("""
                 202--20
-                =0-00-1
-                6=5-3--
-                =1-0=-3
-                3-10=1=
-                -3==8=5
-                4=20=0-
-                -2==502
-                2--1-0-
+                !0|00|1
+                6=5-3||
+                !1|0!|3
+                3|10!1!
+                |3==8=5
+                4=20!0|
+                |2==502
+                2--1|0|
                 002=5=3
             """.trimIndent())
 
             val actual = SolverReduceStrategy.reduce(board)
 
-            println(board.printBoard())
-            println(actual.printBoard())
-            println(actual.isSolved())
-            println("Unconnected: ${actual.unConnectedNodes().joinToString("\n")}")
+            assertEquals(expected, actual)
+            assertTrue(actual.isSolved())
         }
     }
 
