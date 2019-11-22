@@ -1,12 +1,13 @@
 package hashi.search
 
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-object BFS : ShortestPathFinder {
+class BFS(private val searchReduceStrategy: SearchReduceStrategy) : ShortestPathFinder {
 
-    override val logger = LoggerFactory.getLogger(BFS::class.toString())
+    override val logger: Logger = LoggerFactory.getLogger(BFS::class.toString())
 
-    private const val maxIterations = 10
+    private val maxIterations = 10
 
     override fun search(root: SearchNode): SearchResult {
 
@@ -19,12 +20,12 @@ object BFS : ShortestPathFinder {
         queue.add(root)
         visited.add(root)
         shortestDistToNode[root] = 0
-        shortestParentToNode[root] = root // set parent of root to root
 
         var iter = 0
         while(queue.isNotEmpty() && iter < maxIterations) {
             iter++
-            node = queue.removeAt(0)
+            val oldNode = node
+            node = searchReduceStrategy.reduce(queue.removeAt(0))
 
             if (!node.isEnd()) {
                 val distToSearchNode = shortestDistToNode[node] ?: throw Exception("Should not have no match") // shouldnt return no match
@@ -39,6 +40,7 @@ object BFS : ShortestPathFinder {
                 queue.addAll(notVisitedNeighbors)
                 visited.addAll(notVisitedNeighbors)
             } else {
+                shortestParentToNode[node] = oldNode
                 break
             }
         }
@@ -46,4 +48,8 @@ object BFS : ShortestPathFinder {
         return SearchResult(node, shortestParentToNode, iter)
     }
 
+}
+
+interface SearchReduceStrategy {
+    fun reduce(node: SearchNode): SearchNode
 }

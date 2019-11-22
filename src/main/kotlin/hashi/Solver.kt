@@ -1,21 +1,30 @@
 package hashi
 
-import hashi.search.BFS
-import hashi.search.SearchNode
-import hashi.search.ShortestPathFinder
+import hashi.search.*
 
-class Solver(private val pathFinder: ShortestPathFinder, private val reduceStrategy: BoardReduceStrategy) {
+class Solver(private val pathFinder: ShortestPathFinder) {
     fun solve(board: Board): List<Board> {
-        val shortestPath = pathFinder.shortestPath(BoardNode(board, reduceStrategy))
-        return shortestPath.map{it as BoardNode}.map{it.board}
+        val shortestPath = pathFinder.shortestPath(BoardSearchNode(board))
+        return shortestPath.map{it as BoardSearchNode}.map{it.board}
     }
 }
 
-object SolverReduceStrategy : BoardReduceStrategy {
+class BoardSearchNode(val board: Board): SearchNode {
+    override val neighbors: Set<SearchNode>
+        get() = board.neighbors().map{BoardSearchNode(it)}.toSet()
+
+    override fun isEnd() = board.isSolved()
+}
+
+object BoardReduceStrategy : SearchReduceStrategy {
 
     private val REDUCE_STRATEGIES: List<ReduceStrategy> = listOf(OneNonConnectedNeighbor, MoreThanThreeBridgesAndTwoNeighbors, NeighborsWithSameRemainingBridges)
 
-    override fun reduce(board: Board): Board {
+    override fun reduce(node: SearchNode): SearchNode {
+        return BoardSearchNode((node as BoardSearchNode).run { reduce(board) })
+    }
+
+    fun reduce(board: Board): Board {
         val niter = 5
         var newBoard = board
         loop@ for (i in 1..niter) {
@@ -29,18 +38,6 @@ object SolverReduceStrategy : BoardReduceStrategy {
     private fun reduceBridges(board: Board): Board {
         return REDUCE_STRATEGIES.fold(board) { newBoard, rule -> rule.reduceBoard(newBoard)}
     }
-}
-
-data class BoardNode(val board: Board, val reduceStrategy: BoardReduceStrategy): SearchNode {
-
-    override val neighbors: Set<SearchNode>
-        get(): Set<SearchNode> {
-            val reducedBoard = reduceStrategy.reduce(board)
-            return reducedBoard.neighbors().map{BoardNode(it, reduceStrategy)}.toSet()
-        }
-
-    override fun isEnd(): Boolean = board.isSolved()
-
 }
 
 fun main(args:Array<String>) {
@@ -57,7 +54,7 @@ fun main(args:Array<String>) {
         0020503 
     """.trimIndent())
 
-    val solution = Solver(BFS, SolverReduceStrategy).solve(board)
+    val solution = Solver(BFS(BoardReduceStrategy)).solve(board)
 
     solution.forEach {it -> println(it.printBoard()); println()}
 }

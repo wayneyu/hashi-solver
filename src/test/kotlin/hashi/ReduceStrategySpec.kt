@@ -3,7 +3,6 @@ package hashi
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
-import org.jetbrains.spek.api.dsl.xit
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
 import kotlin.test.assertEquals
@@ -210,7 +209,7 @@ class ReduceStrategySpec : Spek({
                 002=5=3
             """.trimIndent())
 
-            val actual = SolverReduceStrategy.reduce(board)
+            val actual = BoardReduceStrategy.reduce(board)
 
             assertEquals(expected, actual)
             assertTrue(actual.isSolved())

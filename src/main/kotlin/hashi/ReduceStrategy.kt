@@ -1,5 +1,7 @@
 package hashi
 
+import hashi.search.SearchNode
+
 interface ReduceStrategy {
     fun reduceBoard(board: Board): Board = board.islands.fold(board){ newBoard, node ->
         if (applicable(newBoard.update(node), newBoard)) {
@@ -9,10 +11,6 @@ interface ReduceStrategy {
     }
     fun reduce(node: Node, board: Board): Board
     fun applicable(node: Node, board: Board): Boolean
-}
-
-interface BoardReduceStrategy {
-    fun reduce(board: Board): Board
 }
 
 object MoreThanThreeBridgesAndTwoNeighbors : ReduceStrategy {

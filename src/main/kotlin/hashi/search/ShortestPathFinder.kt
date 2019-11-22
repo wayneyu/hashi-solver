@@ -1,5 +1,6 @@
 package hashi.search
 
+import hashi.BoardSearchNode
 import org.slf4j.Logger
 
 interface ShortestPathFinder {
@@ -17,7 +18,6 @@ interface ShortestPathFinder {
     }
 
     fun shortestPathFromEndToStart(node: SearchNode, shortestParent: Map<SearchNode, SearchNode>): List<SearchNode> {
-        val parent = shortestParent[node] ?: throw Exception("should not have no match")
-        return if (parent == node) listOf(node) else listOf(node).plus(shortestPathFromEndToStart(parent, shortestParent))
+        return shortestParent[node]?.let{parent -> listOf(node).plus(shortestPathFromEndToStart(parent, shortestParent))} ?: listOf(node)
     }
 }

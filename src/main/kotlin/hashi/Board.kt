@@ -50,7 +50,7 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
         return findNode(node.x, node.y)
     }
 
-    fun unConnectedNodes(): List<Node> = islands.filter { it.remaining() > 0 }
+    private fun unConnectedNodes(): List<Node> = islands.filter { it.remaining() > 0 }
 
     override fun equals(other: Any?): Boolean {
         return if (other is Board)
@@ -113,6 +113,14 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
                 }
 
         return board.joinToString("\n"){ it -> it.joinToString("")}
+    }
+
+    override fun hashCode(): Int {
+        var result = xSize
+        result = 31 * result + ySize
+        result = 31 * result + islands.hashCode()
+        result = 31 * result + bridges.hashCode()
+        return result
     }
 
     companion object {
