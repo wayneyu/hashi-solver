@@ -36,10 +36,7 @@ data class BoardNode(val board: Board, val reduceStrategy: BoardReduceStrategy):
     override val neighbors: Set<SearchNode>
         get(): Set<SearchNode> {
             val reducedBoard = reduceStrategy.reduce(board)
-            return reducedBoard.islands
-                    .flatMap { island -> reducedBoard.getNeighborIslands(island).map { neighbor -> reducedBoard.connect(island, neighbor) } }
-                    .map { BoardNode(it, reduceStrategy) }
-                    .toSet()
+            return reducedBoard.neighbors().map{BoardNode(it, reduceStrategy)}.toSet()
         }
 
     override fun isEnd(): Boolean = board.isSolved()

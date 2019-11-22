@@ -94,6 +94,10 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
 
     fun connect2(node1: Node, node2: Node) = connect2(node1.x, node1.y, node2.x, node2.y)
 
+    fun neighbors(): Set<Board> = islands
+            .flatMap { island -> getNeighborIslands(island).map { neighbor -> connect(island, neighbor) } }
+            .toSet()
+
     fun printBoard(): String {
         val board = (1..xSize).map{ (1..ySize).map{"0"}.toMutableList() }.toMutableList()
         islands.forEach { node -> board[node.x][node.y] = node.bridges.toString() }
