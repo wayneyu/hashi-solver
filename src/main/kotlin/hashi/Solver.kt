@@ -34,12 +34,15 @@ object SolverReduceStrategy : BoardReduceStrategy {
 data class BoardNode(val board: Board, val reduceStrategy: BoardReduceStrategy): SearchNode {
 
     override val neighbors: Set<SearchNode>
-        get() = reduceStrategy.reduce(board).islands.flatMap{ island -> board.getNeighborIslands(island).map{ neighbor -> board.connect(island, neighbor)}}
-                .map{BoardNode(it, reduceStrategy)}.toSet()
+        get(): Set<SearchNode> {
+            val reducedBoard = reduceStrategy.reduce(board)
+            return reducedBoard.islands
+                    .flatMap { island -> reducedBoard.getNeighborIslands(island).map { neighbor -> reducedBoard.connect(island, neighbor) } }
+                    .map { BoardNode(it, reduceStrategy) }
+                    .toSet()
+        }
 
-    override fun isEnd(): Boolean {
-        return board.islands.all { it.isFull() }
-    }
+    override fun isEnd(): Boolean = board.isSolved()
 
 }
 
@@ -54,9 +57,10 @@ fun main(args:Array<String>) {
         4020000
         0200502
         2001000
-        0020503
+        0020503 
     """.trimIndent())
 
     val solution = Solver(BFS, SolverReduceStrategy).solve(board)
+
     solution.forEach {it -> println(it.printBoard()); println()}
 }
