@@ -37,13 +37,15 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
 
     fun findNode(x: Int, y: Int): Node = islands.find{it.x == x && it.y == y} ?: error("No node located at ($x, $y)")
 
-    fun replaceNode(node: Node, newNode: Node): Board {
+    private fun replaceNode(node: Node, newNode: Node): Board {
         val newNodes = islands.toMutableList().apply { this[this.indexOf(node)] = newNode }
         return this.copy(islands = newNodes)
     }
 
+    // node1 is reachable to node2 is no bridge is in the connection path and both nodes have empty slots for connection
     fun reachable(node1: Node, node2: Node): Boolean {
-        return bridges.filterNot { it == Bridge(node1, node2) }.all { !it.intersects(Bridge(node1, node2)) }
+        return bridges.filter {it == Bridge(node1, node2)}.size < 2 && node1.hasEmptySlot() && node2.hasEmptySlot() &&
+            bridges.filterNot { it == Bridge(node1, node2) }.all { !it.intersects(Bridge(node1, node2)) }
     }
 
     fun update(node: Node): Node {
@@ -59,17 +61,13 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
         else false
     }
 
-    fun printBridges(): String {
-        return bridges.sorted().joinToString("\n") { it -> "(${it.node1.x}, ${it.node1.y}) -> (${it.node2.x}, ${it.node2.y})" }
-    }
-
     fun isSolved(): Boolean = unConnectedNodes().isEmpty()
 
     fun connect(x1: Int, y1: Int, x2: Int, y2: Int): Board {
         val node1 = islands.find{ it.x == x1 && it.y == y1}!!
         val node2 = islands.find{ it.x == x2 && it.y == y2}!!
         println("connecting $node1 and $node2")
-        assert(this.islands.contains(node1) && this.islands.contains(node2)) {"Cannot connect. $node1 or $node2 is not part of the board"}
+        assert(islands.contains(node1) && islands.contains(node2)) {"Cannot connect. $node1 or $node2 is not part of the board"}
         assert(node1.x == node2.x || node1.y == node2.y) {"Bridge cannot be connected diagonally. node1: $node1, node2: $node2"}
         assert(node1.x != node2.x || node1.y != node2.y) {"Cannot connect node to itself, source is same as destination"}
         assert(node1.remaining() >= 1 && node2.remaining() >= 1){"No empty slot on $node1 or $node2 to connect"}
@@ -80,7 +78,7 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
         return this
                 .replaceNode(node1, newNode1)
                 .replaceNode(node2, newNode2)
-                .copy(bridges = this.bridges + Bridge(newNode1, newNode2))
+                .copy(bridges = bridges + Bridge(newNode1, newNode2))
     }
 
     fun connect(node1: Node, node2: Node) = connect(node1.x, node1.y, node2.x, node2.y)
@@ -192,6 +190,8 @@ data class Node(val id: Int = -1, val bridges: Int, val x: Int, val y: Int, val 
     fun remaining(): Int = bridges - connected // remaining unconnected bridges
 
     fun maxUnconnected(): Int = min(bridges - connected, 2) // max remaining unconnected bridges in any direction
+
+    fun hasEmptySlot(): Boolean = remaining() > 0
 
     override fun equals(other: Any?): Boolean {
         return if(other is Node) bridges == other.bridges && x == other.x && y == other.y

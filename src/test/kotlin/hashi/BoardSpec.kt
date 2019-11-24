@@ -189,7 +189,6 @@ class BoardSpec : Spek({
             assertEquals(expected.islands, actual.islands)
         }
 
-
         it("should return not reachable if one node cannot connect to another") {
             val board = Board.fromString("""
                 00101
@@ -200,6 +199,24 @@ class BoardSpec : Spek({
             """.trimIndent())
 
             assertFalse { board.reachable(board.findNode(2, 0), board.findNode(0, 4)) }
+        }
+
+        it("should return not reachable if two nodes are already connected but still have open slots in other directions") {
+            val board = Board.fromString("""
+                00000
+                00400
+                00!00
+                00400
+                00000
+            """.trimIndent())
+
+            assertFalse { board.reachable(board.findNode(1, 2), board.findNode(3, 2)) }
+        }
+    }
+
+    describe("node") {
+        it("should return max unconnected bridges in any direction") {
+
         }
     }
 })

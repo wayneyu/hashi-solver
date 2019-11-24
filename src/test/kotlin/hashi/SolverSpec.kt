@@ -33,5 +33,25 @@ class SolverSpec : Spek({
 
             assertTrue(solution.last().isSolved())
         }
+
+        it("should solve a medium hashi board") {
+            val board = Board.fromString("""
+                03004020
+                20000002
+                02030010
+                00002004
+                50040020
+                01003000
+                40010003
+                02003050
+                00020103
+                20001030
+                02030203
+            """.trimIndent())
+
+            val solution = solver.solve(board)
+
+            assertTrue(solution.last().isSolved())
+        }
     }
 })

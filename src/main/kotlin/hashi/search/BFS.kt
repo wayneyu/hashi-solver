@@ -27,8 +27,9 @@ class BFS(private val searchReduceStrategy: SearchReduceStrategy) : ShortestPath
             val oldNode = node
             node = searchReduceStrategy.reduce(queue.removeAt(0))
 
+            println("it: $iter")
             if (!node.isEnd()) {
-                val distToSearchNode = shortestDistToNode[node] ?: throw Exception("Should not have no match") // shouldnt return no match
+                val distToSearchNode = shortestDistToNode[oldNode] ?: throw Exception("Should not have no match") // shouldnt return no match
                 val neighbors = node.neighbors
                 neighbors.forEach {
                     if (shortestDistToNode.getOrElse(it){Integer.MAX_VALUE} > distToSearchNode + 1) { // not exist = not reached, set to Int.MAX_VALUE
