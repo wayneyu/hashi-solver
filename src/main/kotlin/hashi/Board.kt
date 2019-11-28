@@ -65,18 +65,38 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
                 else -> neighborIslands.map{maxUnconnected(it, island)}.sum() >= island.remaining()
             }
         }
-        if (invalidNodes.isNotEmpty()) println("invalid nodes: $invalidNodes")
+//        if (invalidNodes.isNotEmpty()) println("invalid nodes: $invalidNodes")
         return invalidNodes.isEmpty()
+    }
+
+
+    fun disjointSets(): Int {
+        fun findParent(parents: IntArray, i: Int): Int {
+            return if (parents[i] == -1) i
+            else findParent(parents, parents[i])
+        }
+        fun id(node: Node): Int = ySize * node.x + node.y
+
+        val parents = IntArray(xSize * ySize){-2}
+        islands.forEach {island -> parents[id(island)] = -1}
+        bridges.toSet().sortedBy{ id(it.node1) }.forEach { bridge ->
+            val set1 = findParent(parents, id(bridge.node1))
+            val set2 = findParent(parents, id(bridge.node2))
+            if (set1 != set2) parents[set1] = set2
+        }
+        val compressed = parents.map{it -> if (it >= 0) findParent(parents, it) else it}
+
+        return compressed.filter{it == -1}.size
     }
 
     private fun unConnectedNodes(): List<Node> = islands.filter { it.remaining() > 0 }
 
-    fun isSolved(): Boolean = unConnectedNodes().isEmpty()
+    fun isSolved(): Boolean = islands.sumBy{it.bridges} == bridges.size * 2 && isValid() && disjointSets() == 1
 
     fun connect(x1: Int, y1: Int, x2: Int, y2: Int): Board {
         val node1 = islands.find{ it.x == x1 && it.y == y1}!!
         val node2 = islands.find{ it.x == x2 && it.y == y2}!!
-        println("connecting $node1 and $node2, no. of existing bridges: ${bridges.size}")
+//        println("connecting $node1 and $node2, no. of existing bridges: ${bridges.size}")
         assert(islands.contains(node1) && islands.contains(node2)) {"Cannot connect. $node1 or $node2 is not part of the board"}
         assert(node1.x == node2.x || node1.y == node2.y) {"Bridge cannot be connected diagonally. node1: $node1, node2: $node2"}
         assert(node1.x != node2.x || node1.y != node2.y) {"Cannot connect node to itself, source is same as destination"}

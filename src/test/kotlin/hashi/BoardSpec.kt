@@ -273,23 +273,44 @@ class BoardSpec : Spek({
             assertEquals(1, board.maxUnconnected(board.findNode(2, 1), node))
         }
 
-        it("should have be valid and has neighbors") {
+        it("should return two disjoint sets if there are two groups of connected islands") {
+            val board = Board.fromString("""
+                2-100
+                |0001
+                1000|
+                001-2
+            """.trimIndent())
+
+            assertEquals(2, board.disjointSets())
+        }
+
+        it("should return one disjoint sets if there is only one group of connected islands") {
+            val board = Board.fromString("""
+                2-2-2
+                |000|
+                1000|
+                001-2
+            """.trimIndent())
+
+            assertEquals(1, board.disjointSets())
+        }
+
+        it("should not be issolved if all islands are connected but there are more than one group of connected islands") {
             val board = Board.fromString("""
                 03==4-20
                 2|00|0|2
                 !2-3|01!
-                !00!2--4
-                5==4002|
-                |1--30!|
-                4--1!0!3
-                !2003-5!
-                !002-1!3
-                200|1-3|
-                02=302=3
+                !00!2004
+                5--4|02!
+                !10|30!!
+                4|01!0!3
+                !2003-5|
+                !|02-1!3
+                2|0|1-3!
+                02-3-2-3
             """.trimIndent())
 
-//            assertTrue(board.isValid())
-            assertEquals(2, board.maxUnconnected(board.findNode(7, 1), board.findNode(7, 4)))
+            assertFalse( board.isSolved())
         }
     }
 })

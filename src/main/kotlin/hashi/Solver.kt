@@ -30,9 +30,9 @@ object BoardReduceStrategy : SearchReduceStrategy {
         loop@ for (i in 1..niter) {
             println("iter: $i")
             newBoard = reduceBridges(newBoard)
-            println("reduced board is valid: ${newBoard.isValid()}")
-            if (newBoard.isSolved()) break@loop
+            if (newBoard.isSolved() || !newBoard.isValid()) break@loop
         }
+        if (newBoard != board && newBoard.isValid()) println("reduced new: \n${newBoard.printBoard()}")
         return newBoard
     }
 

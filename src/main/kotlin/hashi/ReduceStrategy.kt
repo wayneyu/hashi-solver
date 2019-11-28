@@ -11,7 +11,6 @@ interface ReduceStrategy {
             if (reduced.isValid()) {
                 reduced
             } else {
-                println(reduced.printBoard())
                 newBoard
             }
         } else newBoard
