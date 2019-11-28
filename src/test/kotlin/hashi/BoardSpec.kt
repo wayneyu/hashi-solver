@@ -110,10 +110,8 @@ class BoardSpec : Spek({
             val expected = Board.fromString("""
                 2=2
             """.trimIndent())
-
+            println(expected)
             assertEquals(expected, board.connect2(0, 0, 0, 2))
-            assertEquals(expected.islands.map{it.connected}, board.connect2(0, 0, 0, 2).islands.map{it.connected})
-            assertEquals(expected.islands.map{it.connected}, board.connect2(board.findNode(0, 0), board.findNode(0, 2)).islands.map{it.connected})
         }
 
         it("should print out board in 2d") {
@@ -212,11 +210,86 @@ class BoardSpec : Spek({
 
             assertFalse { board.reachable(board.findNode(1, 2), board.findNode(3, 2)) }
         }
-    }
 
-    describe("node") {
-        it("should return max unconnected bridges in any direction") {
+        it("should return not reachable if one node has no empty slot") {
+            val board = Board.fromString("""
+                00000
+                002-1
+                00|00
+                00402
+                00000
+            """.trimIndent())
 
+            assertFalse { board.reachable(board.findNode(1, 2), board.findNode(3, 2)) }
+        }
+
+        it("should return not valid board a node has remaining bridges but has no empty neighbors") {
+            val board = Board.fromString("""
+                03--4-20
+                2!00|002
+                !203|01!
+                !00|2004
+                5--4002|
+                |10030||
+                400100|3
+                !2003-5|
+                !002-1!3
+                20001-3|
+                020302-3
+            """.trimIndent())
+
+            assertFalse { board.isValid()}
+        }
+
+        it("should return same hash") {
+            val board1 = Board(4, 4,
+                listOf(Node(0, 2, 1, 2, 1), Node(1, 2, 3, 2, 1)),
+                listOf(Bridge(Node(0, 2, 1, 2, 2), Node(1, 2, 3, 2, 1))))
+            val board2 = Board(4, 4,
+                listOf(Node(1, 2, 3, 2, 1), Node(0, 2, 1, 2, 2)),
+                listOf(Bridge(Node(1, 2, 3, 2, 1), Node(0, 2, 1, 2, 2))))
+
+            assertEquals(board1.hashCode(), board2.hashCode())
+            assertEquals(board1, board2)
+        }
+
+        it("should return available connections in all directions") {
+            val board = Board.fromString("""
+                03--4020
+                2|000002
+                !203001!
+                !0002004
+                5--4002|
+                |10030||
+                400100|3
+                !2003-5|
+                !002-1!3
+                20001-3|
+                020302-3
+            """.trimIndent())
+
+            val node = board.findNode(0, 1)
+            assertEquals(1, board.maxUnconnected(board.findNode(0, 4), node))
+            assertEquals(1, board.maxUnconnected(board.findNode(2, 1), node))
+        }
+
+        it("should have be valid and has neighbors") {
+            val board = Board.fromString("""
+                03==4-20
+                2|00|0|2
+                !2-3|01!
+                !00!2--4
+                5==4002|
+                |1--30!|
+                4--1!0!3
+                !2003-5!
+                !002-1!3
+                200|1-3|
+                02=302=3
+            """.trimIndent())
+
+//            assertTrue(board.isValid())
+            assertEquals(2, board.maxUnconnected(board.findNode(7, 1), board.findNode(7, 4)))
         }
     }
 })

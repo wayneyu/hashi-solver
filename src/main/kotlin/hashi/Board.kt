@@ -1,5 +1,6 @@
 package hashi
 
+import java.lang.Math.max
 import java.lang.Math.min
 
 data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val bridges: List<Bridge> = emptyList()) {
@@ -37,6 +38,14 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
 
     fun findNode(x: Int, y: Int): Node = islands.find{it.x == x && it.y == y} ?: error("No node located at ($x, $y)")
 
+    fun maxUnconnected(node1: Node, node2: Node): Int {
+        return if (!reachable(node1, node2)) 0
+        else {
+            val existingBridges = bridges.filter{it == Bridge(node1, node2)}
+            min(min(node1.bridges, node2.bridges), 2) - existingBridges.size
+        }
+    }
+
     private fun replaceNode(node: Node, newNode: Node): Board {
         val newNodes = islands.toMutableList().apply { this[this.indexOf(node)] = newNode }
         return this.copy(islands = newNodes)
@@ -48,25 +57,26 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
             bridges.filterNot { it == Bridge(node1, node2) }.all { !it.intersects(Bridge(node1, node2)) }
     }
 
-    fun update(node: Node): Node {
-        return findNode(node.x, node.y)
+    fun isValid(): Boolean {
+        val invalidNodes = this.unConnectedNodes().filterNot { island ->
+            val neighborIslands = this.getNeighborIslands(island)
+            when (neighborIslands.size) {
+                0 -> false
+                else -> neighborIslands.map{maxUnconnected(it, island)}.sum() >= island.remaining()
+            }
+        }
+        if (invalidNodes.isNotEmpty()) println("invalid nodes: $invalidNodes")
+        return invalidNodes.isEmpty()
     }
 
     private fun unConnectedNodes(): List<Node> = islands.filter { it.remaining() > 0 }
-
-    override fun equals(other: Any?): Boolean {
-        return if (other is Board)
-            other.xSize == xSize && other.ySize == ySize && other.islands.sorted() == islands.sorted() &&
-            other.bridges.toSet() == bridges.toSet()
-        else false
-    }
 
     fun isSolved(): Boolean = unConnectedNodes().isEmpty()
 
     fun connect(x1: Int, y1: Int, x2: Int, y2: Int): Board {
         val node1 = islands.find{ it.x == x1 && it.y == y1}!!
         val node2 = islands.find{ it.x == x2 && it.y == y2}!!
-        println("connecting $node1 and $node2")
+        println("connecting $node1 and $node2, no. of existing bridges: ${bridges.size}")
         assert(islands.contains(node1) && islands.contains(node2)) {"Cannot connect. $node1 or $node2 is not part of the board"}
         assert(node1.x == node2.x || node1.y == node2.y) {"Bridge cannot be connected diagonally. node1: $node1, node2: $node2"}
         assert(node1.x != node2.x || node1.y != node2.y) {"Cannot connect node to itself, source is same as destination"}
@@ -92,9 +102,16 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
 
     fun connect2(node1: Node, node2: Node) = connect2(node1.x, node1.y, node2.x, node2.y)
 
-    fun neighbors(): Set<Board> = islands
-            .flatMap { island -> getNeighborIslands(island).map { neighbor -> connect(island, neighbor) } }
-            .toSet()
+    fun neighbors(): Set<Board> {
+        val neighbors = islands
+                .flatMap { island -> getNeighborIslands(island).map { neighbor -> connect(island, neighbor) } }
+                .filter { it.isValid() }
+                .toSet()
+
+        println("getting neighbors for board that has ${bridges.size} bridges. Number of neighbors: ${neighbors.size}")
+        if (neighbors.isEmpty()) println("board has no neighbors: \n${printBoard()}");
+        return neighbors
+    }
 
     fun printBoard(): String {
         val board = (1..xSize).map{ (1..ySize).map{"0"}.toMutableList() }.toMutableList()
@@ -113,10 +130,16 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
         return board.joinToString("\n"){ it -> it.joinToString("")}
     }
 
+    override fun equals(other: Any?): Boolean {
+        return if (other is Board)
+            other.xSize == xSize && other.ySize == ySize && other.islands.sorted() == islands.sorted() &&
+                    other.bridges.toSet() == bridges.toSet()
+        else false
+    }
+
     override fun hashCode(): Int {
         var result = xSize
         result = 31 * result + ySize
-        result = 31 * result + islands.hashCode()
         result = 31 * result + bridges.hashCode()
         return result
     }
@@ -212,6 +235,7 @@ data class Node(val id: Int = -1, val bridges: Int, val x: Int, val y: Int, val 
 }
 
 data class Bridge(val node1: Node, val node2: Node) : Comparable<Bridge>{
+
     override fun equals(other: Any?): Boolean {
         return if (other is Bridge)
             (other.node1 == node1 && other.node2 == node2) ||  (other.node1 == node2 && other.node2 == node1)

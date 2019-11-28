@@ -50,7 +50,7 @@ class SolverSpec : Spek({
             """.trimIndent())
 
             val solution = solver.solve(board)
-
+            println(solution.last().printBoard())
             assertTrue(solution.last().isSolved())
         }
     }

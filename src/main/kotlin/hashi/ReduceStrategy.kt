@@ -4,10 +4,16 @@ import hashi.search.SearchNode
 
 interface ReduceStrategy {
     fun reduceBoard(board: Board): Board = board.islands.fold(board){ newBoard, node ->
-        val newNode = newBoard.update(node)
+        val newNode = newBoard.findNode(node.x, node.y)
         if (applicable(newNode, newBoard)) {
             println("applicable: $newNode, strategy: ${this.javaClass.simpleName} ")
-            reduce(newNode, newBoard)
+            val reduced = reduce(newNode, newBoard)
+            if (reduced.isValid()) {
+                reduced
+            } else {
+                println(reduced.printBoard())
+                newBoard
+            }
         } else newBoard
     }
     fun reduce(node: Node, board: Board): Board
