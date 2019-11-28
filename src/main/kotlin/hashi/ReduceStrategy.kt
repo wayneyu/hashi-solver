@@ -45,6 +45,7 @@ object OneNonConnectedNeighbor : ReduceStrategy {
     override fun reduce(node: Node, board: Board): Board {
         val neighbors = node.run { board.getNeighborIslands(this) }
         val neighbor1 = neighbors.first()
+        println("connecting $node and $neighbor1")
         return if (node.remaining() == 2)
             board.connect2(node, neighbor1)
         else
@@ -72,4 +73,23 @@ object NeighborsWithSameRemainingBridges : ReduceStrategy {
             }
         }
     }
+}
+
+object TwoBridgesTwoNeighborsStrategy : ReduceStrategy {
+    override fun applicable(node: Node, board: Board): Boolean {
+        val neighbors = board.getNeighborIslands(node)
+        return node.bridges == 2 && neighbors.size == 2 && neighbors.any { it.bridges <= 2 }
+    }
+
+    override fun reduce(node: Node, board: Board): Board {
+        val neighbors = board.getNeighborIslands(node)
+        return neighbors.fold(board) {newBoard, neighbor ->
+            val theOtherNeighbor = neighbors.find { it != neighbor }!!
+            when (theOtherNeighbor.bridges) {
+                1, 2 -> newBoard.connect(node, neighbor)
+                else -> newBoard
+            }
+        }
+    }
+
 }

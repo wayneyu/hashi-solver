@@ -43,14 +43,14 @@ class ReduceStrategySpec : Spek({
         it("should reduce island with only one neighbor") {
             verifyStrategy(
             """
-                10002
+                10202
                 00000
                 00000
                 00000
                 00000
             """.trimIndent(),
             """
-                1---2
+                1-202
                 00000
                 00000
                 00000
@@ -79,15 +79,15 @@ class ReduceStrategySpec : Spek({
         it("should reduce island with six bridges and three neighbors"){
             verifyStrategy(
                     """
-                00200
-                00000
+                10200
+                |0000
                 30600
                 00000
                 1-4-1
             """.trimIndent(),
                     """
-                00200
-                00!00
+                10200
+                |0!00
                 3=600
                 00!00
                 1-4-1
@@ -97,32 +97,32 @@ class ReduceStrategySpec : Spek({
         it("should reduce island with four bridges and two neighbors"){
             verifyStrategy(
                     """
-                00200
                 00000
-                30003
                 00000
-                04004
+                1---3
+                00000
+                02004
             """.trimIndent(),
                     """
-                00200
                 00000
-                30003
+                00000
+                1---3
                 0000!
-                04==4
+                02==4
             """.trimIndent(), NeighborsWithSameRemainingBridges)
 
             verifyStrategy(
                     """
                 00200
                 00000
-                305-1
+                205-1
                 00000
                 00000
             """.trimIndent(),
                     """
                 00200
                 00!00
-                3=5-1
+                2=5-1
                 00000
                 00000
             """.trimIndent(), NeighborsWithSameRemainingBridges)
@@ -150,14 +150,14 @@ class ReduceStrategySpec : Spek({
                     """
                 00200
                 00000
-                306-1
+                206-1
                 00000
                 00100
             """.trimIndent(),
                     """
                 00200
                 00!00
-                3=6-1
+                2=6-1
                 00|00
                 00100
             """.trimIndent(), NeighborsWithSameRemainingBridges)
@@ -166,14 +166,14 @@ class ReduceStrategySpec : Spek({
                     """
                 00200
                 00000
-                30501
+                20501
                 00000
                 00000
             """.trimIndent(),
                     """
                 00200
                 00!00
-                3=5-1
+                2=5-1
                 00000
                 00000
             """.trimIndent(), NeighborsWithSameRemainingBridges)
@@ -213,6 +213,21 @@ class ReduceStrategySpec : Spek({
 
             assertEquals(expected, actual)
             assertTrue(actual.isSolved())
+        }
+    }
+
+    describe("twoBridgesTwoNeighborsStrategy") {
+        it("should reduce board with two bridge island with two neighbors") {
+            verifyStrategy("""
+                20003
+                00000
+                00102
+            """.trimIndent(),
+            """
+                20003
+                0000|
+                00102
+            """.trimIndent(), TwoBridgesTwoNeighborsStrategy)
         }
     }
 
