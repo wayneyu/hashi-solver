@@ -9,10 +9,12 @@ interface ReduceStrategy {
             println("applicable: $newNode, strategy: ${this.javaClass.simpleName} ")
             val reduced = reduce(newNode, newBoard)
             if (reduced.isValid()) {
+//                if (this.javaClass.simpleName == "TwoBridgesTwoNeighborsStrategy")  println(reduced.printBoard())
                 reduced
             } else {
                 newBoard
             }
+
         } else newBoard
     }
     fun reduce(node: Node, board: Board): Board
@@ -78,7 +80,7 @@ object NeighborsWithSameRemainingBridges : ReduceStrategy {
 object TwoBridgesTwoNeighborsStrategy : ReduceStrategy {
     override fun applicable(node: Node, board: Board): Boolean {
         val neighbors = board.getNeighborIslands(node)
-        return node.bridges == 2 && neighbors.size == 2 && neighbors.any { it.bridges <= 2 }
+        return node.bridges == 2 && node.remaining() == 2 && neighbors.size == 2 && neighbors.any { it.bridges <= 2 }
     }
 
     override fun reduce(node: Node, board: Board): Board {

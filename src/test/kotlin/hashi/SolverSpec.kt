@@ -72,6 +72,10 @@ class SolverSpec : Spek({
                 3000203020
             """.trimIndent())
 
+            // todo bug
+            //iter: 4
+            //applicable: Node(id=21, bridges=3, x=1, y=7, connected=2), strategy: OneNonConnectedNeighbor
+
             val solution = solver.solve(board)
             println(solution.last().printBoard())
             assertTrue(solution.last().isSolved())

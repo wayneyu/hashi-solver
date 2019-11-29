@@ -65,7 +65,7 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
                 else -> neighborIslands.map{maxUnconnected(it, island)}.sum() >= island.remaining()
             }
         }
-        if (invalidNodes.isNotEmpty()) println("invalid nodes: $invalidNodes")
+//        if (invalidNodes.isNotEmpty()) println("invalid nodes: $invalidNodes")
         return invalidNodes.isEmpty()
     }
 

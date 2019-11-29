@@ -18,7 +18,7 @@ class BoardSearchNode(val board: Board): SearchNode {
 
 object BoardReduceStrategy : SearchReduceStrategy {
 
-    private val REDUCE_STRATEGIES: List<ReduceStrategy> = listOf(OneNonConnectedNeighbor, MoreThanThreeBridgesAndTwoNeighbors, NeighborsWithSameRemainingBridges)
+    private val REDUCE_STRATEGIES: List<ReduceStrategy> = listOf(OneNonConnectedNeighbor, MoreThanThreeBridgesAndTwoNeighbors, NeighborsWithSameRemainingBridges, TwoBridgesTwoNeighborsStrategy)
 
     override fun reduce(node: SearchNode): SearchNode {
         return BoardSearchNode((node as BoardSearchNode).run { reduce(board) })
