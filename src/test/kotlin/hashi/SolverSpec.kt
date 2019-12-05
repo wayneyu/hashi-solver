@@ -6,6 +6,7 @@ import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @RunWith(JUnitPlatform::class)
@@ -26,7 +27,7 @@ class SolverSpec : Spek({
                 4020000
                 0200502
                 2001000
-                0020503 
+                0020503
             """.trimIndent())
 
             val solution = solver.solve(board)
@@ -72,13 +73,25 @@ class SolverSpec : Spek({
                 3000203020
             """.trimIndent())
 
-            // todo bug
-            //iter: 4
-            //applicable: Node(id=21, bridges=3, x=1, y=7, connected=2), strategy: OneNonConnectedNeighbor
-
+            val expected = Board.fromString("""
+                /2-3--2--1 /
+                /| |2===3-2/
+                /2 5=4=3-2|/
+                /| !     |3/
+                /4=5-4--2|!/
+                /|   !1 ||3/
+                /|2-1!| |2|/
+                /3|  !3-3|2/
+                /!4==5|2|1|/
+                /3|  ||!4-4/
+                /|3=2|2!! !/
+                /3   1|3!1!/
+                /! 2==3|2|2/
+                /3---2-3-2 /
+                """.trimIndent())
             val solution = solver.solve(board)
-            println(solution.last().printBoard())
-            assertTrue(solution.last().isSolved())
+
+            assertEquals(expected, solution.last())
         }
     }
 })

@@ -1,6 +1,5 @@
 package hashi
 
-import java.lang.Math.max
 import java.lang.Math.min
 
 data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val bridges: List<Bridge> = emptyList()) {
@@ -29,12 +28,14 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
             .minBy { it.x }
 
     fun getNeighborIslands(node: Node): List<Node> =
+        getAllNeighborIslands(node).mapNotNull { neighbor -> if (reachable(neighbor, node)) neighbor else null}
+
+    fun getAllNeighborIslands(node: Node): List<Node> =
             listOfNotNull(
                     getIslandToEast(node),
                     getIslandToWest(node),
                     getIslandToNorth(node),
                     getIslandToSouth(node))
-                    .mapNotNull { neighbor -> if (reachable(neighbor, node)) neighbor else null}
 
     fun findNode(x: Int, y: Int): Node = islands.find{it.x == x && it.y == y} ?: error("No node located at ($x, $y)")
 
@@ -96,7 +97,7 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
     fun connect(x1: Int, y1: Int, x2: Int, y2: Int): Board {
         val node1 = islands.find{ it.x == x1 && it.y == y1}!!
         val node2 = islands.find{ it.x == x2 && it.y == y2}!!
-//        println("connecting $node1 and $node2, no. of existing bridges: ${bridges.size}")
+        println("connecting $node1 and $node2, no. of existing bridges: ${bridges.size}")
         assert(islands.contains(node1) && islands.contains(node2)) {"Cannot connect. $node1 or $node2 is not part of the board"}
         assert(node1.x == node2.x || node1.y == node2.y) {"Bridge cannot be connected diagonally. node1: $node1, node2: $node2"}
         assert(node1.x != node2.x || node1.y != node2.y) {"Cannot connect node to itself, source is same as destination"}
@@ -147,7 +148,7 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
                         ((node1.x + 1) until node2.x).forEach {i -> board[i][node1.y] = if (size == 2) xDoubleBridgeToken else xSingleBridgeToken}
                 }
 
-        return board.joinToString("\n"){ it -> it.joinToString("")}
+        return board.joinToString("\n"){ it -> it.joinToString("").replace("0", " ")}
     }
 
     override fun equals(other: Any?): Boolean {
@@ -170,15 +171,16 @@ data class Board(val xSize: Int, val ySize: Int, val islands: List<Node>, val br
         private const val yDoubleBridgeToken = "="
         private const val xSingleBridgeToken = "|"
         private const val xDoubleBridgeToken = "!"
+        private const val emptySpaceToken = "0"
 
         fun fromString(layout: String): Board {
-            val xys = layout.split("\n").map{it.trim().toCharArray().toList().map{c -> c.toString()}}
+            val xys = layout.split("\n").map{it.trimEnd().trimStart('/').trimEnd('/').toCharArray().toList().map{c -> c.toString()}}
             val xSize = xys.size
             val ySize = xys[0].size
 
             val nodes = xys.mapIndexedNotNull { x, row ->
                 row.mapIndexedNotNull { y, c ->
-                    if (c != "0") c.toIntOrNull()?.let{ bridges -> Node(xSize * x + y, bridges, x, y)}
+                    if (c != emptySpaceToken) c.toIntOrNull()?.let{ bridges -> Node(xSize * x + y, bridges, x, y)}
                     else null
                 }
             }.flatten()

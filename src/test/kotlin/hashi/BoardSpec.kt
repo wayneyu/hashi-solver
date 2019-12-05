@@ -129,10 +129,10 @@ class BoardSpec : Spek({
             val actual = board.printBoard()
             val expected = """
                 1-3=4
-                0000!
-                00003
-                0000|
-                00001
+                    !
+                    3
+                    |
+                    1
             """.trimIndent()
 
             assertEquals(expected, actual)
@@ -141,10 +141,10 @@ class BoardSpec : Spek({
         it("should translate a 2d map of a board") {
             val layout = """
                 3-5=4
-                !0!0!
+                ! ! !
                 4-4-4
-                |000|
-                2-101
+                |   |
+                2-1 1
             """.trimIndent()
 
             val actual = Board.fromString(layout)

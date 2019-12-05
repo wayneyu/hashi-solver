@@ -7,7 +7,7 @@ class BFS(private val searchReduceStrategy: SearchReduceStrategy = DefaultReduce
 
     override val logger: Logger = LoggerFactory.getLogger(BFS::class.toString())
 
-    private val maxIterations = 200
+    private val maxIterations = 20
 
     override fun search(root: SearchNode): SearchResult {
 

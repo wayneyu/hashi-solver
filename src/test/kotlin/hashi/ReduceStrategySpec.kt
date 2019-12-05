@@ -22,24 +22,6 @@ class ReduceStrategySpec : Spek({
 
     describe("reduceStrategy") {
 
-        it("should reduce island with 3 bridges and only 2 neighbors") {
-            verifyStrategy(
-            """
-                10003
-                00000
-                00000
-                00000
-                00002
-            """.trimIndent(),
-            """
-                1---3
-                0000|
-                0000|
-                0000|
-                00002
-            """.trimIndent(), MoreThanThreeBridgesAndTwoNeighbors)
-        }
-
         it("should reduce island with only one neighbor") {
             verifyStrategy(
             """
@@ -228,6 +210,107 @@ class ReduceStrategySpec : Spek({
                 0000|
                 00102
             """.trimIndent(), TwoBridgesTwoNeighborsStrategy)
+        }
+    }
+
+    describe("ConnectOneForEachNeighbor") {
+
+        it("should reduce island with 3 bridges and only 2 neighbors") {
+            verifyStrategy(
+                    """
+                10003
+                00000
+                00000
+                00000
+                00002
+            """.trimIndent(),
+                    """
+                1---3
+                0000|
+                0000|
+                0000|
+                00002
+            """.trimIndent(), ConnectOneForEachNeigbors)
+        }
+
+        it("should connect 5 bridges island with 3 neighbors") {
+            verifyStrategy("""
+                00100
+                00000
+                20502
+            """.trimIndent(),
+            """
+                00100
+                00|00
+                2-5-2
+            """.trimIndent(), ConnectOneForEachNeigbors)
+        }
+
+        it("should connect 7 bridges island with 4 neighbors") {
+            verifyStrategy("""
+                00100
+                00000
+                20702
+                00000
+                00200
+            """.trimIndent(),
+            """
+                00100
+                00|00
+                2-7-2
+                00|00
+                00200
+            """.trimIndent(), ConnectOneForEachNeigbors)
+        }
+        
+        it("should connect 3 bridges island with 2 neighbors, scenario 2") {
+            verifyStrategy("""
+                2-3--20010
+                0002===302
+                205040302|
+                00|00000|3
+                4-5-4002||
+                |0000100|3
+                |201000020
+                3|00030302
+                |400502010
+                3|00000404
+                03-202000|
+                300010301|
+                |02==30202
+                3---203-20
+            """.trimIndent(),
+            """
+                2-3--20010
+                0002===302
+                205040302|
+                00|00000|3
+                4-5-4002||
+                |0000100|3
+                |20100002| 
+                3|00030302
+                |400502010
+                3|00000404
+                |3-202000|
+                300010301|
+                |02==30202
+                3---203-20
+            """.trimIndent(), ConnectOneForEachNeigbors)
+        }
+    }
+
+    describe("TwoBridgesThreeNeighbors") {
+        it("should connect with one bridge") {
+            verifyStrategy("""
+                20201
+                00000
+                10100
+            """.trimIndent(),
+                    """
+                2-201
+                00000
+                10100
+            """.trimIndent(), TwoBridgesTwoSingleBridgeNeighbors)
         }
     }
 
